@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.service.NotificationService;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.SignalType;
 
 @RestController
 public class NotificationController {
@@ -19,6 +20,16 @@ public class NotificationController {
 
     @GetMapping(value = "/notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> getNotifications() {
-        return notificationService.streamNotifications();
+        return notificationService.streamNotifications()
+                .doOnCancel(() -> System.out.println("Client canceled the request. Stopping stream..."))
+                .doOnError(error -> System.out.println("Error occurred: " + error.getMessage()))
+                .onErrorResume(error -> Flux.empty())
+                .doFinally(signalType -> {
+                    if (signalType == SignalType.CANCEL) {
+                        System.out.println("Flux Completed due to Cancelation");
+                    } else {
+                        System.out.println("Flux Completed due to Completion or Error");
+                    }
+                });
     }
 }

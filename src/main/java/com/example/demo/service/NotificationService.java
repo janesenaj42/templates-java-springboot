@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.Random;
@@ -9,16 +10,25 @@ import java.util.Random;
 @Service
 public class NotificationService {
 
+    private final Sinks.Many<String> sink;
     private final Random random = new Random();
 
-    public Flux<String> streamNotifications() {
-        return Flux.interval(Duration.ofSeconds(5))
-                .map(tick -> "Notification: " + generateRandomMessage())
-                .delayElements(Duration.ofMillis(random.nextInt(2000)));
+    public NotificationService() {
+        this.sink = Sinks.many().multicast().onBackpressureBuffer();
+
+        // Simulate random notifications
+        Flux.interval(Duration.ofSeconds(1)) // Generate ticks every second
+                .map(tick -> generateRandomNotification())
+                .doOnNext(sink::tryEmitNext) // Push each notification into the sink
+                .subscribe();
     }
 
-    private String generateRandomMessage() {
-        String[] messages = { "New message", "System alert", "Friend request", "Task update" };
+    public Flux<String> streamNotifications() {
+        return sink.asFlux();
+    }
+
+    private String generateRandomNotification() {
+        String[] messages = { "System alert", "Friend request", "Task update" };
         return messages[random.nextInt(messages.length)];
     }
 }
