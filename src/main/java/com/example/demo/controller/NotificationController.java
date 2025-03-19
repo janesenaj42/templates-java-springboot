@@ -1,12 +1,18 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.NotificationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.service.NotificationService;
+
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+@Slf4j
 @RestController
 public class NotificationController {
 
@@ -16,6 +22,28 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @MessageMapping("/request-response")
+    public Mono<String> currentMarketData(String input) {
+        log.info("Request and response. Received input {}", input);
+        return notificationService.updateString(input);
+    }
+
+    @MessageMapping("/fire-forget")
+    public Mono<Void> collectMarketData(String input) {
+        log.info("Fire and forget. Received input {}", input);
+        return Mono.empty();
+    }
+
+    @MessageMapping("/request-stream")
+    public Flux<String> feedMarketData(String input) {
+        log.info("Request and stream. Received input {}", input);
+        return notificationService.streamNotifications();
+    }
+
+    /**
+     * Streaming JSON example.
+     * @return Flux of notification string.
+     */
     @GetMapping(value = "/notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> getNotifications() {
         return notificationService.streamNotifications()
