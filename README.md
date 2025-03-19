@@ -17,7 +17,7 @@ curl --location 'http://localhost:8080/notifications' \
 --header 'Content-Type: application/stream+json'
 ```
 
-## RSocket
+### RSocket
 1. Download `rsc` from https://github.com/making/rsc.
 2. Test the respective rSocket endpoints:
     ```
