@@ -1,0 +1,52 @@
+// Get version for Jenkins
+task getVersion() {
+    doLast {
+        println version
+    }
+}
+
+// Auto format.
+spotless {
+    format 'misc', {
+        target '*.gradle', '.gitignore'
+        indentWithTabs()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    java {
+        // targetExclude("**/KafkaLoggingAspect.java") //Example on how to exclude file
+//        eclipse().configFile(rootProject.file('config/eclipse/eclipse-pref.xml'))
+        importOrder()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+// Check compiled binary.
+spotbugs {
+    toolVersion = '4.8.0'
+    ignoreFailures = true
+}
+spotbugsMain {
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/spotbugs-main.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+spotbugsTest {
+    reports {
+        html {
+            enabled = true
+            destination = file("$buildDir/reports/spotbugs/spotbugs-test.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+dependencies {
+    compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugs.toolVersion.get()}"
+}
