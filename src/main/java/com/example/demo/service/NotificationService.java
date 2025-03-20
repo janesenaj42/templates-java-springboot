@@ -1,11 +1,10 @@
 package com.example.demo.service;
 
+import java.time.Duration;
+import java.util.Random;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
-
-import java.time.Duration;
-import java.util.Random;
 
 @Service
 public class NotificationService {

@@ -1,11 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.service.NotificationService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.example.demo.service.NotificationService;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SignalType;
 
