@@ -15,7 +15,7 @@ public class NotificationService {
     private final Random random = new Random();
 
     public NotificationService() {
-        this.sink = Sinks.many().multicast().onBackpressureBuffer();
+        this.sink = Sinks.many().replay().limit(10);
 
         // Simulate random notifications
         Flux.interval(Duration.ofSeconds(1)) // Generate ticks every second

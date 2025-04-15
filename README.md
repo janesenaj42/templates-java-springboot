@@ -44,9 +44,8 @@ curl --location 'http://localhost:8080/notifications' \
    --data-urlencode "username=$USERNAME" \
    --data-urlencode "password=$PASSWORD" \
     | grep -o '"access_token":"[^"]*"' | cut -d':' -f2 | tr -d '"' ) && echo $ACCESS_TOKEN
-   ```
-   
-2. Test the respective rSocket endpoints:
+   ``` 
+3. Test the respective rSocket endpoints:
     ```
     // Request-response
    rsc --request --route=/request-response --authBearer=$ACCESS_TOKEN --data="my sample input" tcp://localhost:7000

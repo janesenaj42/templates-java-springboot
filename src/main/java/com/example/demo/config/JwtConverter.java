@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Component
 public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
@@ -44,6 +46,7 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
     }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
+        log.debug("---- extractResourceRoles");
         Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
         Map<String, Object> resource;
         Collection<String> resourceRoles;
@@ -54,7 +57,8 @@ public class JwtConverter implements Converter<Jwt, AbstractAuthenticationToken>
             return Set.of();
         }
         return resourceRoles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+//                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 }

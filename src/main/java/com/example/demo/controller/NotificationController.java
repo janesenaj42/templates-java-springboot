@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,9 +35,36 @@ public class NotificationController {
         return Mono.empty();
     }
 
+    /**
+     * Any authenticated users can access.
+     * @param input Input data.
+     * @return Flux of notification string.
+     */
     @MessageMapping("/request-stream")
     public Flux<String> feedMarketData(String input) {
         log.info("Request and stream. Received input {}", input);
+        return notificationService.streamNotifications();
+    }
+
+    /**
+     * Authenticated users with 'normaluser' client role can access.
+     * @param input Input data.
+     * @return Flux of notification string.
+     */
+    @MessageMapping("/normal.request-stream")
+    public Flux<String> feedMarketDataUser(String input) {
+        log.info("Request and stream for normal user. Received input {}", input);
+        return notificationService.streamNotifications();
+    }
+
+    /**
+     * Authenticated users with 'superuser' client role can access.
+     * @param input Input data.
+     * @return Flux of notification string.
+     */
+    @MessageMapping("/admin.request-stream")
+    public Flux<String> feedMarketDataAdmin(String input) {
+        log.info("Request and stream for admin. Received input {}", input);
         return notificationService.streamNotifications();
     }
 

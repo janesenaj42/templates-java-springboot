@@ -26,12 +26,6 @@ import java.util.stream.Stream;
 @EnableRSocketSecurity
 public class RSocketSecurityConfig {
 
-//    private JwtConverterProperties jwtConverterProperties;
-//
-//    public RSocketSecurityConfig(JwtConverterProperties jwtConverterProperties) {
-//        this.jwtConverterProperties = jwtConverterProperties;
-//    }
-
     private JwtConverter jwtConverter;
 
     public RSocketSecurityConfig(JwtConverter jwtConverter) {
@@ -39,13 +33,15 @@ public class RSocketSecurityConfig {
     }
 
     @Bean
-    public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket, ReactiveJwtDecoder jwtDecoder) {
+    public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket, JwtReactiveAuthenticationManager jwtAuthManager) {
         rsocket.authorizePayload(authorize ->
                         authorize
+                                .route("normal.*").hasAuthority("normaluser")
+                                .route("admin.*").hasAuthority("superuser")
                                 .anyRequest().authenticated()
                                 .anyExchange().permitAll()
                 )
-                .jwt(jwtSpec -> jwtSpec.authenticationManager(jwtReactiveAuthenticationManager(jwtDecoder)));
+                .jwt(jwt -> jwt.authenticationManager(jwtAuthManager));
         return rsocket.build();
     }
 
