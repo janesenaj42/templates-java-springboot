@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Random;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 @Service
@@ -13,7 +14,7 @@ public class NotificationService {
     private final Random random = new Random();
 
     public NotificationService() {
-        this.sink = Sinks.many().multicast().onBackpressureBuffer();
+        this.sink = Sinks.many().replay().limit(10);
 
         // Simulate random notifications
         Flux.interval(Duration.ofSeconds(1)) // Generate ticks every second
@@ -29,5 +30,9 @@ public class NotificationService {
     private String generateRandomNotification() {
         String[] messages = { "System alert", "Friend request", "Task update" };
         return messages[random.nextInt(messages.length)];
+    }
+
+    public Mono<String> updateString(String input) {
+        return Mono.just(String.format("Updated string: %s", input));
     }
 }
