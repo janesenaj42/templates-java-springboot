@@ -7,3 +7,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     command: start-dev
+    volumes:
+        - keycloak-volume:/opt/jboss/keycloak/standalone/data/
+
+volumes:
+  keycloak-volume:
