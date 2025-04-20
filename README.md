@@ -64,7 +64,7 @@ curl --location 'http://localhost:8080/notifications' \
    
 ## Keycloak Setup
 
-1. Login to keycloak at http://localhost:8080 with the XX
+1. Login to keycloak at http://localhost:8080 with the credentials defined in the docker compose file.
 2. Create a new realm `my-realm`.
 ![img.png](media/img.png)
 3. Navigate to `Clients` and create a new client `my-sample-app` with the following settings. Leave the other default settings.
