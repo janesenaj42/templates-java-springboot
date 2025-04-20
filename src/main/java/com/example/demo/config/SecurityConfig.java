@@ -9,26 +9,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
 import org.springframework.security.config.annotation.rsocket.RSocketSecurity;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoders;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.rsocket.core.PayloadSocketAcceptorInterceptor;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Slf4j
 @Configuration
 @EnableRSocketSecurity
-public class RSocketSecurityConfig {
-
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    private String issuerLocation;
+@EnableWebFluxSecurity
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
+public class SecurityConfig {
 
     @Value("${jwt.auth.converter.resource-id}")
     private String resourceId;
@@ -36,8 +38,27 @@ public class RSocketSecurityConfig {
     public static final String NORMAL_USER = "user";
     public static final String ADMIN_USER = "administrator";
 
+    // ✅ HTTP Security
     @Bean
-    public PayloadSocketAcceptorInterceptor rsocketInterceptor(RSocketSecurity rsocket) {
+    public SecurityWebFilterChain httpSecurity(ServerHttpSecurity http) {
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/public").permitAll()
+                        .pathMatchers("/admin/**").hasRole(ADMIN_USER)
+                        .pathMatchers("/user/**").hasRole(NORMAL_USER)
+                        .anyExchange().authenticated()
+                )
+                .oauth2ResourceServer(ServerHttpSecurity.OAuth2ResourceServerSpec::jwt)
+                .build();
+    }
+
+    // ✅ RSocket Security
+    @Bean
+    public PayloadSocketAcceptorInterceptor rsocketInterceptor(
+            RSocketSecurity rsocket,
+            JwtReactiveAuthenticationManager jwtReactiveAuthenticationManager// ← auto-configured
+    ) {
         // `.anyExchange().permitAll()' allows non-payload-level exchanges like setup frames, authentication metadata, etc., so the client can actually connect and be authenticated.
         rsocket.authorizePayload(authorize ->
                         authorize
@@ -46,17 +67,13 @@ public class RSocketSecurityConfig {
                                 .anyRequest().authenticated()
                                 .anyExchange().permitAll()
                 )
-                .jwt(jwtSpec -> jwtSpec.authenticationManager(jwtReactiveAuthenticationManager(jwtDecoder())));
+                .jwt(jwtSpec -> jwtSpec.authenticationManager(jwtReactiveAuthenticationManager));
         return rsocket.build();
     }
 
     @Bean
-    public ReactiveJwtDecoder jwtDecoder() {
-        return ReactiveJwtDecoders.fromIssuerLocation(issuerLocation);
-    }
-
-    @Bean
     public JwtReactiveAuthenticationManager jwtReactiveAuthenticationManager(ReactiveJwtDecoder decoder) {
+        log.debug("----jwtReactiveAuthenticationManager()");
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(jwt -> {
             JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();

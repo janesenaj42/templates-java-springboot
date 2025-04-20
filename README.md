@@ -21,7 +21,7 @@ If you're lazy to install Java, you may run the project in VS Code using DevCont
 ### Streaming JSON response via HTTP GET calls
 You may call the sample `/notifications` endpoint by,
 ```
-curl --location 'http://localhost:8080/notifications' \
+curl --location 'http://localhost:8081/notifications' \
 --header 'Content-Type: application/stream+json'
 ```
 
@@ -32,8 +32,8 @@ curl --location 'http://localhost:8080/notifications' \
    export KEYCLOAK_URL=http://localhost:8080
    export REALM_NAME=my-realm
    export CLIENT_ID=my-sample-app
-   export USERNAME=asdf
-   export PASSWORD=asdfasdf
+   export USERNAME=<your username>
+   export PASSWORD=<your password>
    
    ACCESS_TOKEN=$(curl -s --location "$KEYCLOAK_URL/realms/$REALM_NAME/protocol/openid-connect/token" \
    --header "Content-Type: application/x-www-form-urlencoded" \
@@ -58,7 +58,10 @@ curl --location 'http://localhost:8080/notifications' \
    rsc --stream --route=/admin.request-stream --authBearer=$ACCESS_TOKEN --data="my sample input"  tcp://localhost:7000
 
    // Request-stream (requires 'user' client role)
-   rsc --stream --route=/admin.request-stream --authBearer=$ACCESS_TOKEN --data="my sample input"  tcp://localhost:7000
+   rsc --stream --route=/normal.request-stream --authBearer=$ACCESS_TOKEN --data="my sample input"  tcp://localhost:7000
+   
+   
+      rsc --stream --route=/admin.request-stream --authBearer=%TOKEN% --data="my sample input"  tcp://localhost:7000
     ```
    You should get 'Access Denied' response if `--authBearer=$ACCESS_TOKEN` is not provided.
    

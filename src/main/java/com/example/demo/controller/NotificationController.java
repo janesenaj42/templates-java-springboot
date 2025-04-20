@@ -4,6 +4,7 @@ import com.example.demo.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -83,5 +84,41 @@ public class NotificationController {
                     }
                 });
     }
+
+    /**
+     * GET call to test admin authorization and authentication for REST endpoints using global SecurityConfig.
+     * @return string.
+     */
+    @GetMapping(value = "/admin/test")
+    public Mono<String> adminTest() {
+        return Mono.just("admin function!");
+    }
+
+    /**
+     * GET call to test user authorization and authentication for REST endpoints using global SecurityConfig.
+     * @return string.
+     */
+    @GetMapping(value = "/user/test")
+    public Mono<String> userTest() {
+        return Mono.just("user function!");
+    }
+
+    /**
+     * GET call to test user authorization and authentication for REST endpoints using @PreAuthorize annotation.
+     * @return string.
+     */
+//    @Secured(SecurityConfig.NORMAL_USER)
+    @PreAuthorize("hasRole('ROLE_administrator')")
+    @GetMapping(value = "/others/test")
+    public Mono<String> othersTest() {
+        return Mono.just("others function!");
+    }
+
+    @GetMapping("/public")
+    public Mono<String> publicEndpoint() {
+        return Mono.just("No auth needed");
+    }
+
+
 
 }
