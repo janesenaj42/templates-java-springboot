@@ -1,14 +1,33 @@
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.0
+    image: quay.io/keycloak/keycloak:25.0.6
     ports:
       - "8080:8080"
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+      KC_HOSTNAME: host.docker.internal
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
     command: start-dev
     volumes:
-        - keycloak-volume:/opt/jboss/keycloak/standalone/data/
+        - ./data/keycloak:/opt/jboss/keycloak/standalone/data/
+  backend:
+    image: amazoncorretto:21.0.9-alpine3.22
+    working_dir: /app
+    volumes:
+      - .:/app
+      - gradle-cache:/home/gradle/.gradle
+    ports:
+      - 8081:8081
+      - 7000:7000
+    stdin_open: true
+    tty: true
 
 volumes:
-  keycloak-volume:
+  gradle-cache:
+
+networks:
+  default:
+    name: shared-network
+    driver: bridge
