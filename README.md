@@ -32,8 +32,8 @@ curl --location 'http://localhost:8080/notifications' \
    export KEYCLOAK_URL=http://localhost:8080
    export REALM_NAME=my-realm
    export CLIENT_ID=my-sample-app
-   export USERNAME=asdf
-   export PASSWORD=asdfasdf
+   export USERNAME=adminuser
+   export PASSWORD=password
    
    ACCESS_TOKEN=$(curl -s --location "$KEYCLOAK_URL/realms/$REALM_NAME/protocol/openid-connect/token" \
    --header "Content-Type: application/x-www-form-urlencoded" \
